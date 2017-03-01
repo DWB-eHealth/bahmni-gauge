@@ -10,18 +10,16 @@ import org.bahmni.gauge.common.PageFactory;
 import org.bahmni.gauge.common.clinical.DashboardPage;
 import org.bahmni.gauge.common.clinical.ObservationsPage;
 import org.bahmni.gauge.common.clinical.domain.DrugOrder;
-import org.bahmni.gauge.common.clinical.domain.ObservationForm;
 import org.bahmni.gauge.common.program.domain.PatientProgram;
 import org.bahmni.gauge.common.registration.domain.Patient;
 import org.bahmni.gauge.rest.BahmniRestClient;
 import org.bahmni.gauge.util.StringUtil;
 import org.junit.Assert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 
+import java.awt.*;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,16 +40,7 @@ public class ObservationSpec extends BaseSpec {
     @Step("Select the template <template> from on the observation page")
     public void clickOnTreatmentEnrollment(String template) throws InterruptedException {
         ObservationsPage observationsPage = PageFactory.get(ObservationsPage.class);
-        observationsPage.selectTemplate(template.replace(" ", "_"));
-        waitForAppReady();
-    }
-
-    @Step("Enter values in <template> template <table>")
-    public void enterTemplateValues(String template, Table table) throws InterruptedException {
-        ObservationForm observationForm = null;
-        if (template.toLowerCase().contains("obstetrics"))
-            observationForm = new ObservationForm(driver.findElement(By.cssSelector("#concept-set-3")));
-        observationForm.fillUp(table);
+        observationsPage.selectTemplate(template);
         waitForAppReady();
     }
 
@@ -137,7 +126,7 @@ public class ObservationSpec extends BaseSpec {
     @Step("Verify the <template> concept set is <displayType>")
     public void verifyObservationFormContent(String template, String displayType) {
         DashboardPage dashboardPage = PageFactory.get(DashboardPage.class);
-        if (displayType.toLowerCase().equals("not displayed"))
+        if (displayType.equalsIgnoreCase("not displayed"))
             Assert.assertFalse("Element " + template + " is displayed", dashboardPage.hasElement(By.cssSelector("#concept-set-4")));
         else
             Assert.assertTrue("Element " + template + " is not displayed", dashboardPage.hasElement(By.cssSelector("#concept-set-4")));
@@ -148,7 +137,7 @@ public class ObservationSpec extends BaseSpec {
         new BahmniPage().closeApp(driver);
     }
 
-    @Step("Fill <Vitals> template with following observation details <table>")
+    @Step("Fill <template> template with following observation details <table>")
     public void enterObservations(String template, Table table) {
         ObservationsPage observationsPage = PageFactory.get(ObservationsPage.class);
         observationsPage.enterObservations(template, table);
@@ -157,15 +146,14 @@ public class ObservationSpec extends BaseSpec {
     @Step("Fill Tuberculosis - Followup template with following observation details <table>")
     public void enterTuberculosis(Table table) throws InterruptedException {
         ObservationsPage observationsPage = PageFactory.get(ObservationsPage.class);
-        observationsPage.expandObservationTemplate("Tuberculosis_Followup_Template");
+        observationsPage.expandObservationTemplate("Tuberculosis - Followup");
         List<TableRow> row = table.getTableRows();
-        List<String> columns = table.getColumnNames();
         String[] values = row.get(0).getCell("Adverse Effects").split(":");
         for (String value : values) {
             observationsPage.adverseEffects.sendKeys(value);
             observationsPage.waitForElementOnPage(observationsPage.adverseEffects);
             Thread.sleep(1000);
-            observationsPage.selectSuggestion(value);
+            observationsPage.selectSuggestion();
         }
     }
 
@@ -176,21 +164,10 @@ public class ObservationSpec extends BaseSpec {
         waitForAppReady();
     }
 
-
-
-    @Step("Remove Adverse effect from Tuberculosis - Followup template <table>")
-    public void removeAdverseEffect(Table table) throws InterruptedException {
+    @Step("Remove Adverse effect from <template> <table>")
+    public void removeAdverseEffect(String template, Table data) throws InterruptedException {
         ObservationsPage observationsPage = PageFactory.get(ObservationsPage.class);
-        observationsPage.expandObservationTemplate("Tuberculosis_Followup_Template");
-        List<TableRow> row = table.getTableRows();
-        List<String> columns = table.getColumnNames();
-        String[] values = row.get(0).getCell("Adverse Effects").split(":");
-        for (String value : values) {
-            WebElement adverseEffect = driver.findElement(By.xpath("//span[text()='"+ value +"']/../a"));
-            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", adverseEffect);
-            Actions actions = new Actions(driver);
-            actions.moveToElement(adverseEffect).click().perform();
-        }
+        observationsPage.removeAdverseEffect(template, data);
     }
 
     @Step("Add more observation")
@@ -213,5 +190,18 @@ public class ObservationSpec extends BaseSpec {
         observationsPage.removeChiefComplaints(template,data);
     }
 
+    @Step("Upload consultation images with Notes on \"History and Examinations\" <table>")
+    public void uploadConsultationImage(String template,Table table) throws InterruptedException, IOException, AWTException {
+        ObservationsPage observationsPage=PageFactory.get(ObservationsPage.class);
+        observationsPage.uploadConsultationImageAndAddComment(template,table);
+    }
 
+
+    @Step("Remove image <imageNumber> from <History and Examinations> on Consultation page")
+    public void removeConsultationImage(Integer imageNumber, String template) {
+        ObservationsPage observationsPage = PageFactory.get(ObservationsPage.class);
+        observationsPage.expandObservationTemplate(template);
+        observationsPage.removeImage(imageNumber);
+        waitForAppReady();
+    }
 }

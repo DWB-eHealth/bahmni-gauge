@@ -11,9 +11,6 @@ import org.bahmni.gauge.rest.BahmniRestClient;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -34,8 +31,6 @@ public class DriverFactory {
 
         ChromeDriverManager.getInstance().setup();
         DesiredCapabilities capability = DesiredCapabilities.chrome();
-        ChromeOptions options = new ChromeOptions();
-        //options.addArguments("--use-fake-ui-for-media-stream");
         capability.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
         //capability.setCapability(ChromeOptions.CAPABILITY,options);
         driver = new ChromeDriver(capability);
@@ -55,9 +50,8 @@ public class DriverFactory {
     public void tearDownScenario() {
         Patient patient = new RegistrationFirstPage().getPatientFromSpecStore();
         if (patient != null) {
-            String uuid = patient.getUuid();
             if (patient.isAdmitted()) {
-                if (BahmniRestClient.get().dischargePatient(uuid)) {
+                if (BahmniRestClient.get().dischargePatient(patient)) {
                     patient.setBedNumber(null);
                     BahmniRestClient.get().retirePatient(patient);
                 }
