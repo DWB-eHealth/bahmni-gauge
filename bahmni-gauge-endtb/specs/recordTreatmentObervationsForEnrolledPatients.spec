@@ -21,6 +21,7 @@ Tags: regression, sanity, smoke
     |01/01/2015|Married||Yes|Pensioner||No|2016|
 
 * Save the consultation
+
 * Navigate to patient dashboard
 * Verify observations recorded under "Baseline"
 
@@ -36,4 +37,4 @@ Record Smear Test Results for enrolled patient and validate
 * Login to the application
 * On the dashboard page
 * Click on "Patient Summary" dashboard
-* Logout the user
+* Verify observations recorded under "Bacteriology Results"

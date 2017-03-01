@@ -11,9 +11,12 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.How;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.SimpleFormatter;
 
 
 public class EndTBRegistrationFirstPage extends RegistrationFirstPage {
@@ -39,7 +42,9 @@ public class EndTBRegistrationFirstPage extends RegistrationFirstPage {
         /* set default values to the patient*/
 		patient.setPrefix("EMR");
         patient.setIdNumber(String.valueOf(new Random().nextInt()));
-		patient.setDateOfBirth(String.valueOf(new Date()));
+        Date dob = new Date();
+        DateFormat userDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		patient.setDateOfBirth(userDateFormat.format(dob));
 		patient.setAge("50");
 		return (EndTBPatient)transform(row, patient, headers);
 	}
